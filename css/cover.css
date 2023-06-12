@@ -126,6 +126,7 @@ body {
 
 .normalize-1px {
   vertical-align: 1px;
+  margin: 5px 0px;
 }
 
 .text-left {
