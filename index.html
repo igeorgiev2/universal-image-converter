@@ -2,321 +2,325 @@
 <html lang="en" class="h-100">
 
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description"
-    content="Universal Image Converter. Convert any image to many popular graphic formats like JPEG, PNG, GIF, XBM, AVIF, WBMP, WebP, BMP, HEIC, TGA, SVG, TIFF and PDF.">
-  <meta name="generator" content="Bootstrap">
-  <title>Universal Image Converter</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description"
+        content="Universal Image Converter. Convert any image to many popular graphic formats like JPEG, PNG, GIF, XBM, AVIF, WBMP, WebP, BMP, HEIC, TGA, SVG, TIFF, PDF  and PSD.">
+    <meta name="generator" content="Bootstrap">
+    <title>Universal Image Converter</title>
 
-  <link href="./css/bootstrap.min.css" rel="stylesheet">
+    <link href="./css/bootstrap.min.css" rel="stylesheet">
 
-  <script src="./js/sweetalert.js"></script>
+    <script src="./js/sweetalert.js"></script>
 
-  <script>
-    function validateImageURL(url) {
-      return new Promise((resolve, reject) => {
-        let image = new Image();
-        image.onload = () => resolve(url);
-        image.onerror = () => reject('Invalid image URL');
-        image.src = url;
-        pictureURL = url;
-      });
-    }
-
-    function setPictureNameLabel(url) {
-      let picture_url = document.getElementById("my-picture-address");
-      if (url == undefined) {
-        picture_url.innerHTML = document.getElementById("my-picture").getAttribute("src").split('/').pop() + "&emsp;";
-      } else {
-        picture_url.innerHTML = url.split('/').pop() + "&emsp;";
-      }
-    }
-
-    function sanitizeFileName(url) {
-      const fileNameParts = url.split('?');
-      return fileNameParts[0];
-    }
-
-    function downloadPicture(external_url, name) {
-      if ((external_url && name) == undefined) {
-        let canvas = myCanvas;
-        let image = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
-        let link = document.createElement("a");
-        link.download = "picture.png";
-        link.href = image;
-        link.click();
-      } else {
-        fetch(external_url)
-          .then(resp => resp.blob())
-          .then(blob => {
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.style.display = 'none';
-            a.href = url;
-            const extension = external_url.split('.').pop();
-            a.download = name + '.' + extension;
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(url);
-          })
-          .catch(() => Swal.fire({
-            icon: 'error',
-            title: 'Something went wrong!',
-            text: 'Most likely, the website you are trying to download the image from has disabled automatic downloads. Try downloading the image manually by right-clicking on the image and selecting "Save image as...".'
-          }));
-      }
-    }
-
-    function insertImage() {
-      Swal.fire({
-        title: 'Enter your picture URL',
-        input: 'url',
-        inputAttributes: {
-          autocapitalize: 'off'
-        },
-        showCancelButton: true,
-        confirmButtonText: 'Show image',
-        preConfirm: (url) => {
-          return validateImageURL(url)
-            .then((url) => {
-              return { url };
-            })
-            .catch((error) => {
-              Swal.showValidationMessage(error);
+    <script>
+        function validateImageURL(url) {
+            return new Promise((resolve, reject) => {
+                let image = new Image();
+                image.onload = () => resolve(url);
+                image.onerror = () => reject('Invalid image URL');
+                image.src = url;
+                pictureURL = url;
             });
         }
-      }).then((result) => {
-        if (result.isConfirmed) {
-          let pictureName = sanitizeFileName(result.value.url).split('/').pop();
-          Swal.fire({
-            showCloseButton: true,
-            showConfirmButton: false,
-            imageUrl: result.value.url,
-            imageAlt: 'Image',
-            html: '<p>Your selected image is ready to convert. Click to download the image. Then upload it to the image converter.</p><button type="button" class="swal2-confirm swal2-styled" aria-label style="display: inline" onclick="downloadPicture(' + `'${result.value.url}','${pictureName}'` + ')">DOWNLOAD</button>',
-          }).then(function () {
 
-          });
-        }
-      }).catch((error) => {
-        console.error(error)
-      });
-    }
-
-    function uploadImage(output) {
-      const input = document.getElementById('upload');
-      let file;
-      input.onchange = () => {
-        file = input.files[0];
-        const reader = new FileReader();
-        if (file != undefined) {
-          reader.readAsDataURL(file);
-          setPictureNameLabel(file.name);
-          reader.onload = () => {
-            localStorage.setItem('my-image', reader.result);
-            myPicture.removeAttribute('width');
-            myPicture.removeAttribute('height');
-            myPicture.src = localStorage.getItem('my-image');
-            myPicture.onload = () => {
-              globalWidth = myPicture.width = myCanvas.width = myPicture.naturalWidth;
-              globalHeight = myPicture.height = myCanvas.height = myPicture.naturalHeight;
-              imageRatio = globalHeight / globalWidth;
-              ctx.drawImage(img, 0, 0, globalWidth, globalHeight);
+        function setPictureNameLabel(url) {
+            let picture_url = document.getElementById("my-picture-address");
+            if (url == undefined) {
+                picture_url.innerHTML = document.getElementById("my-picture").getAttribute("src").split('/').pop() + "&emsp;";
+            } else {
+                picture_url.innerHTML = url.split('/').pop() + "&emsp;";
             }
-          }
-          Swal.fire({
-            text: "Your image is ready to convert to " + output + " format",
-            icon: 'warning',
-            showCancelButton: true,
-            allowOutsideClick: false,
-            confirmButtonText: 'Proceed'
-          }).then((result) => {
-            if (result.isConfirmed) {
-              serverUpload(globalOutputFormat);
-              Swal.fire({
-                showConfirmButton: false,
-                allowOutsideClick: false,
-                text: 'Converting...'
-              }).then((result) => {
+        }
 
+        function sanitizeFileName(url) {
+            const fileNameParts = url.split('?');
+            return fileNameParts[0];
+        }
 
-                /* Restart the page when pressed okay. This is to prepare for next convertion. */
-                if (result.isConfirmed) {
+        function downloadPicture(external_url, name) {
+            if ((external_url && name) == undefined) {
+                let canvas = myCanvas;
+                let image = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
+                let link = document.createElement("a");
+                link.download = "picture.png";
+                link.href = image;
+                link.click();
+            } else {
+                fetch(external_url)
+                    .then(resp => resp.blob())
+                    .then(blob => {
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.style.display = 'none';
+                        a.href = url;
+                        const extension = external_url.split('.').pop();
+                        a.download = name + '.' + extension;
+                        document.body.appendChild(a);
+                        a.click();
+                        window.URL.revokeObjectURL(url);
+                    })
+                    .catch(() => Swal.fire({
+                        icon: 'error',
+                        title: 'Something went wrong!',
+                        text: 'Most likely, the website you are trying to download the image from has disabled automatic downloads. Try downloading the image manually by right-clicking on the image and selecting "Save image as...".'
+                    }));
+            }
+        }
 
+        function insertImage() {
+            Swal.fire({
+                title: 'Enter your picture URL',
+                input: 'url',
+                inputAttributes: {
+                    autocapitalize: 'off'
+                },
+                showCancelButton: true,
+                confirmButtonText: 'Show image',
+                preConfirm: (url) => {
+                    return validateImageURL(url)
+                        .then((url) => {
+                            return { url };
+                        })
+                        .catch((error) => {
+                            Swal.showValidationMessage(error);
+                        });
                 }
-              })
-            } else if (
-              result.dismiss === Swal.DismissReason.cancel
-            ) {
-              document.getElementById('upload').value = '';
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    let pictureName = sanitizeFileName(result.value.url).split('/').pop();
+                    Swal.fire({
+                        showCloseButton: true,
+                        showConfirmButton: false,
+                        imageUrl: result.value.url,
+                        imageAlt: 'Image',
+                        html: '<p>Your selected image is ready to convert. Click to download the image. Then upload it to the image converter.</p><button type="button" class="swal2-confirm swal2-styled" aria-label style="display: inline" onclick="downloadPicture(' + `'${result.value.url}','${pictureName}'` + ')">DOWNLOAD</button>',
+                    }).then(function () {
+
+                    });
+                }
+            }).catch((error) => {
+                console.error(error)
+            });
+        }
+
+        function uploadImage(output) {
+            const input = document.getElementById('upload');
+            let file;
+            input.onchange = () => {
+                file = input.files[0];
+                const reader = new FileReader();
+                if (file != undefined) {
+                    reader.readAsDataURL(file);
+                    setPictureNameLabel(file.name);
+                    reader.onload = () => {
+                        localStorage.setItem('my-image', reader.result);
+                        myPicture.removeAttribute('width');
+                        myPicture.removeAttribute('height');
+                        myPicture.src = localStorage.getItem('my-image');
+                        myPicture.onload = () => {
+                            globalWidth = myPicture.width = myCanvas.width = myPicture.naturalWidth;
+                            globalHeight = myPicture.height = myCanvas.height = myPicture.naturalHeight;
+                            imageRatio = globalHeight / globalWidth;
+                            ctx.drawImage(img, 0, 0, globalWidth, globalHeight);
+                        }
+                    }
+                    Swal.fire({
+                        text: "Your image is ready to convert to " + output + " format",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        allowOutsideClick: false,
+                        confirmButtonText: 'Proceed'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            serverUpload(globalOutputFormat);
+                            Swal.fire({
+                                showConfirmButton: false,
+                                allowOutsideClick: false,
+                                text: 'Converting...'
+                            }).then((result) => {
+
+
+                                /* Restart the page when pressed okay. This is to prepare for next convertion. */
+                                if (result.isConfirmed) {
+
+                                }
+                            })
+                        } else if (
+                            result.dismiss === Swal.DismissReason.cancel
+                        ) {
+                            document.getElementById('upload').value = '';
+                        }
+                    })
+                }
             }
-          })
         }
-      }
-    }
 
-    function toggleButtons(buttonID) {
-      const buttons = document.querySelectorAll('#format-buttons-container button');
-      buttons.forEach(element => {
-        element.classList.remove('active');
-      });
-      buttons.forEach(element => {
-        if (element.id == buttonID) {
-          element.classList.add('active');
-          globalOutputFormat = element.id.substr('7');
+        function toggleButtons(buttonID) {
+            const buttons = document.querySelectorAll('#format-buttons-container button');
+            buttons.forEach(element => {
+                element.classList.remove('active');
+            });
+            buttons.forEach(element => {
+                if (element.id == buttonID) {
+                    element.classList.add('active');
+                    globalOutputFormat = element.id.substr('7');
+                }
+            });
         }
-      });
-    }
 
-    function convertImage() {
-      if (globalOutputFormat != "") {
-        document.getElementById('upload-label').click();
-        uploadImage(globalOutputFormat);
-      } else Swal.fire({
-        text: "First select the output format!",
-        icon: 'warning'
-      });
-    }
-
-    async function serverUpload(outputFormat) {
-      const input = document.getElementById('upload');
-      let formData = new FormData();
-      formData.append("file", input.files[0]);
-      formData.append("outputFormat", outputFormat);
-
-      try {
-        const response = await fetch('./convert.php', {
-          method: "POST",
-          body: formData
-        });
-
-        if (response.ok) {
-          const result = await response.json();
-          let imageURL = 'https://' + result.converted_image;
-          let imageName = 'converted_image';
-          Swal.fire({
-            showConfirmButton: false,
-            allowOutsideClick: false,
-            html: '<button type="button" class="swal2-confirm swal2-styled" aria-label style="display: inline" onclick="downloadPicture(' + `'${imageURL}','${imageName}'` + '); document.getElementById(\'upload\').value = \'\'; Swal.close();">DOWNLOAD</button><button type="button" class="swal2-confirm swal2-styled" aria-label style="display: inline" onclick="document.getElementById(\'upload\').value = \'\'; Swal.close();">OK</button>'
-          })
-        } else {
-          alert('Error uploading file. Status: ' + response.status);
+        function convertImage() {
+            if (globalOutputFormat != "") {
+                document.getElementById('upload-label').click();
+                uploadImage(globalOutputFormat);
+            } else Swal.fire({
+                text: "First select the output format!",
+                icon: 'warning'
+            });
         }
-      } catch (error) {
-        alert('An error occurred during the file upload. Error: ' + error.message);
-      }
-    }
+
+        async function serverUpload(outputFormat) {
+            const input = document.getElementById('upload');
+            let formData = new FormData();
+            formData.append("file", input.files[0]);
+            formData.append("outputFormat", outputFormat);
+
+            try {
+                const response = await fetch('./convert.php', {
+                    method: "POST",
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    let imageURL = 'https://' + result.converted_image;
+                    let imageName = 'converted_image';
+                    Swal.fire({
+                        showConfirmButton: false,
+                        allowOutsideClick: false,
+                        html: '<button type="button" class="swal2-confirm swal2-styled" aria-label style="display: inline" onclick="downloadPicture(' + `'${imageURL}','${imageName}'` + '); document.getElementById(\'upload\').value = \'\'; Swal.close();">DOWNLOAD</button><button type="button" class="swal2-confirm swal2-styled" aria-label style="display: inline" onclick="document.getElementById(\'upload\').value = \'\'; Swal.close();">OK</button>'
+                    })
+                } else {
+                    alert('Error uploading file. Status: ' + response.status);
+                }
+            } catch (error) {
+                alert('An error occurred during the file upload. Error: ' + error.message);
+            }
+        }
 
 
-  </script>
+    </script>
 
-  <!-- Custom styles for this template -->
-  <link href="./css/cover.css" rel="stylesheet">
+    <!-- Custom styles for this template -->
+    <link href="./css/cover.css" rel="stylesheet">
 </head>
 
 <body class="d-flex text-center text-bg-dark">
-  <div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column">
-    <header class="mb-auto pb-4">
-      <div>
-        <h3 class="mb-0">Universal Image Converter</h3>
-      </div>
-    </header>
+    <div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column">
+        <header class="mb-auto pb-4">
+            <div>
+                <h3 class="mb-0">Universal Image Converter</h3>
+            </div>
+        </header>
 
-    <main class="px-3">
-      <h3 class="lead">The universal image converter is a one-page converter for transforming the graphic format of any
-        image.</h3>
-      <h3 class="lead">Supported file formats - JPEG, PNG, GIF, XBM, AVIF, WBMP, WebP, BMP, HEIC, TGA, SVG, TIFF and
-        PDF.</h3>
-      <div class="row py-3">
-        <div id="my-picture-container" class="col-lg-12 text-center img-magnifier-container">
-          <img id="my-picture"
-            src="https://raw.githubusercontent.com/igeorgiev2/universal-image-converter/main/select.png"
-            class="img-fluid hide-element" alt="my-picture" crossorigin="anonymous">
-          <canvas id="my-picture-canvas" class="img-fluid border border-primary"></canvas>
-        </div>
-        <div id="format-buttons-container" class="col-lg-12 py-2 text-center">
-          <button id="button-jpeg" type="button" class="btn btn-primary btn-sm normalize-1px"
-            onClick="toggleButtons('button-jpeg')">JPEG</button>
-          <button id="button-png" type="button" class="btn btn-primary btn-sm normalize-1px"
-            onClick="toggleButtons('button-png')">PNG</button>
-          <button id="button-gif" type="button" class="btn btn-primary btn-sm normalize-1px"
-            onClick="toggleButtons('button-gif')">GIF</button>
-          <button id="button-xbm" type="button" class="btn btn-primary btn-sm normalize-1px"
-            onClick="toggleButtons('button-xbm')">XBM</button>
-          <button id="button-avif" type="button" class="btn btn-primary btn-sm normalize-1px"
-            onClick="toggleButtons('button-avif')">AVIF</button>
-          <button id="button-wbmp" type="button" class="btn btn-primary btn-sm normalize-1px"
-            onClick="toggleButtons('button-wbmp')">WBMP</button>
-          <button id="button-webp" type="button" class="btn btn-primary btn-sm normalize-1px"
-            onClick="toggleButtons('button-webp')">WEBP</button>
-          <button id="button-bmp" type="button" class="btn btn-primary btn-sm normalize-1px"
-            onClick="toggleButtons('button-bmp')">BMP</button>
-          <button id="button-heic" type="button" class="btn btn-primary btn-sm normalize-1px"
-            onClick="toggleButtons('button-heic')">HEIC</button>
-          <button id="button-tga" type="button" class="btn btn-primary btn-sm normalize-1px"
-            onClick="toggleButtons('button-tga')">TGA</button>
-          <button id="button-svg" type="button" class="btn btn-primary btn-sm normalize-1px"
-            onClick="toggleButtons('button-svg')">SVG</button>
-          <button id="button-tiff" type="button" class="btn btn-primary btn-sm normalize-1px"
-            onClick="toggleButtons('button-tiff')">TIFF</button>
-          <button id="button-pdf" type="button" class="btn btn-primary btn-sm normalize-1px"
-            onClick="toggleButtons('button-pdf')">PDF</button>
-        </div>
-        <div id="my-picture-address-buttons-container" class="col-lg-12 py-2 text-center">
-          <span class="py-1">
-            <b><span id="my-picture-address"></span></b>
-          </span>
-          <button id="insert" type="button" class="btn btn-primary btn-sm normalize-1px"
-            onClick="insertImage()">Insert</button>
-          <label id="upload-label" for="upload" style="display: none">Choose an image to upload...</label>
-          <input id="upload" type="file" accept="image/*" style="display: none">
-          <button id="upload-button" type="button" class="btn btn-primary btn-sm normalize-1px"
-            onclick="convertImage()">Upload</button>
-        </div>
-      </div>
-      <div class="row py-3"
-        style="margin-right: calc(-1.8 * var(--bs-gutter-x));margin-left: calc(-1.8 * var(--bs-gutter-x));">
-      </div>
-      <p>Convert your images to high-quality files with ease using our online Universal Image Converter tool.</p>
-    </main>
+        <main class="px-3">
+            <h3 class="lead">The universal image converter is a one-page converter for transforming the graphic format
+                of any
+                image.</h3>
+            <h3 class="lead">Supported file formats - JPEG, PNG, GIF, XBM, AVIF, WBMP, WebP, BMP, HEIC, TGA, SVG, TIFF,
+                PDF and
+                PSD.</h3>
+            <div class="row py-3">
+                <div id="my-picture-container" class="col-lg-12 text-center img-magnifier-container">
+                    <img id="my-picture"
+                        src="https://raw.githubusercontent.com/igeorgiev2/universal-image-converter/main/select.png"
+                        class="img-fluid hide-element" alt="my-picture" crossorigin="anonymous">
+                    <canvas id="my-picture-canvas" class="img-fluid border border-primary"></canvas>
+                </div>
+                <div id="format-buttons-container" class="col-lg-12 py-2 text-center">
+                    <button id="button-jpeg" type="button" class="btn btn-primary btn-sm normalize-1px"
+                        onClick="toggleButtons('button-jpeg')">JPEG</button>
+                    <button id="button-png" type="button" class="btn btn-primary btn-sm normalize-1px"
+                        onClick="toggleButtons('button-png')">PNG</button>
+                    <button id="button-gif" type="button" class="btn btn-primary btn-sm normalize-1px"
+                        onClick="toggleButtons('button-gif')">GIF</button>
+                    <button id="button-xbm" type="button" class="btn btn-primary btn-sm normalize-1px"
+                        onClick="toggleButtons('button-xbm')">XBM</button>
+                    <button id="button-avif" type="button" class="btn btn-primary btn-sm normalize-1px"
+                        onClick="toggleButtons('button-avif')">AVIF</button>
+                    <button id="button-wbmp" type="button" class="btn btn-primary btn-sm normalize-1px"
+                        onClick="toggleButtons('button-wbmp')">WBMP</button>
+                    <button id="button-webp" type="button" class="btn btn-primary btn-sm normalize-1px"
+                        onClick="toggleButtons('button-webp')">WEBP</button>
+                    <button id="button-bmp" type="button" class="btn btn-primary btn-sm normalize-1px"
+                        onClick="toggleButtons('button-bmp')">BMP</button>
+                    <button id="button-heic" type="button" class="btn btn-primary btn-sm normalize-1px"
+                        onClick="toggleButtons('button-heic')">HEIC</button>
+                    <button id="button-tga" type="button" class="btn btn-primary btn-sm normalize-1px"
+                        onClick="toggleButtons('button-tga')">TGA</button>
+                    <button id="button-svg" type="button" class="btn btn-primary btn-sm normalize-1px"
+                        onClick="toggleButtons('button-svg')">SVG</button>
+                    <button id="button-tiff" type="button" class="btn btn-primary btn-sm normalize-1px"
+                        onClick="toggleButtons('button-tiff')">TIFF</button>
+                    <button id="button-pdf" type="button" class="btn btn-primary btn-sm normalize-1px"
+                        onClick="toggleButtons('button-pdf')">PDF</button>
+                    <button id="button-psd" type="button" class="btn btn-primary btn-sm normalize-1px"
+                        onClick="toggleButtons('button-psd')">PSD</button>
+                </div>
+                <div id="my-picture-address-buttons-container" class="col-lg-12 py-2 text-center">
+                    <span class="py-1">
+                        <b><span id="my-picture-address"></span></b>
+                    </span>
+                    <button id="insert" type="button" class="btn btn-primary btn-sm normalize-1px"
+                        onClick="insertImage()">Insert</button>
+                    <label id="upload-label" for="upload" style="display: none">Choose an image to upload...</label>
+                    <input id="upload" type="file" accept="image/*" style="display: none">
+                    <button id="upload-button" type="button" class="btn btn-primary btn-sm normalize-1px"
+                        onclick="convertImage()">Upload</button>
+                </div>
+            </div>
+            <div class="row py-3"
+                style="margin-right: calc(-1.8 * var(--bs-gutter-x));margin-left: calc(-1.8 * var(--bs-gutter-x));">
+            </div>
+            <p>Convert your images to high-quality files with ease using our online Universal Image Converter tool.</p>
+        </main>
 
-    <footer class="mt-auto text-white-50">
-      <p>Send feedback or ask a question <a class="text-white"
-          href="mailto:igeorgiev.uk@gmail.com?subject=Picture_Colorizer_Question&body=Message">here</a>.</p>
-    </footer>
-  </div>
+        <footer class="mt-auto text-white-50">
+            <p>Send feedback or ask a question <a class="text-white"
+                    href="mailto:igeorgiev.uk@gmail.com?subject=Picture_Colorizer_Question&body=Message">here</a>.</p>
+        </footer>
+    </div>
 
-  <script>
-    let myPictureContainer = document.getElementById("my-picture-container"),
-      myPicture = document.getElementById("my-picture"),
-      pictureURL, globalWidth, globalHeight, imageRatio,
-      myCanvas = document.getElementById("my-picture-canvas"),
-      ctx = myCanvas.getContext("2d", { willReadFrequently: true }),
-      img = myPicture,
-      globalOutputFormat = "";
+    <script>
+        let myPictureContainer = document.getElementById("my-picture-container"),
+            myPicture = document.getElementById("my-picture"),
+            pictureURL, globalWidth, globalHeight, imageRatio,
+            myCanvas = document.getElementById("my-picture-canvas"),
+            ctx = myCanvas.getContext("2d", { willReadFrequently: true }),
+            img = myPicture,
+            globalOutputFormat = "";
 
-    window.onload = setTimeout(() => {
-      globalWidth = myPicture.naturalWidth,
-        globalHeight = myPicture.naturalHeight,
-        imageRatio = globalHeight / globalWidth,
-        myPicture.width = globalWidth,
-        myPicture.height = globalHeight,
-        myCanvas.width = globalWidth,
-        myCanvas.height = globalHeight,
-        ctx.imageSmoothingEnabled = true,
-        ctx.imageSmoothingQuality = "high",
-        ctx.drawImage(img, 0, 0),
-        setPictureNameLabel();
-    }, 1000);
+        window.onload = setTimeout(() => {
+            globalWidth = myPicture.naturalWidth,
+                globalHeight = myPicture.naturalHeight,
+                imageRatio = globalHeight / globalWidth,
+                myPicture.width = globalWidth,
+                myPicture.height = globalHeight,
+                myCanvas.width = globalWidth,
+                myCanvas.height = globalHeight,
+                ctx.imageSmoothingEnabled = true,
+                ctx.imageSmoothingQuality = "high",
+                ctx.drawImage(img, 0, 0),
+                setPictureNameLabel();
+        }, 1000);
 
-    window.addEventListener('beforeunload', function (e) {
-      myCanvas.remove();
-      ctx.remove();
-      img.remove();
-    });
+        window.addEventListener('beforeunload', function (e) {
+            myCanvas.remove();
+            ctx.remove();
+            img.remove();
+        });
 
-  </script>
+    </script>
 </body>
 
 </html>
